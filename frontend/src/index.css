@@ -1,0 +1,47 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+button, input {
+  cursor: pointer;
+  outline: none;
+  border: none;
+  background: none;
+}
+
+.message-input {
+  border: 1.5px solid rgba(0,0,0, .3);
+  width: 100%;
+  border-radius: 4px;
+  padding: 7px;
+  transition: .4s;
+}
+
+.message-input:focus {
+  border: 1.5px solid rgba(0,0,0, .7);
+}
+
+.send-button {
+  color: #fff;
+  border-radius: 4px;
+  padding: 5px 12px;
+  transition: .4s;
+  background-color: rgba(0, 135, 0);
+  font-size: 1.1rem;
+}
+
+.logout-button {
+  font-size: 1.1rem;
+  transition: .4s;
+}
+
+.logout-icon {
+  color: rgba(0, 0, 0, 0.9);
+  margin-left: .2rem;
+}
+
+.send-button:hover {
+  background-color: rgba(0, 135, 0, .75);
+}
