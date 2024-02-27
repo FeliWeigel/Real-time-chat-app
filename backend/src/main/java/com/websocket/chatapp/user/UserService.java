@@ -16,9 +16,7 @@ public class UserService {
     private final UserRepository repository;
 
     public ResponseEntity<Object> registerUser(User user){
-        if(user.getFullName().isBlank() || user.getNickName().isBlank() ||
-                user.getEmail().isBlank() || user.getPassword().isBlank()
-        ){
+        if(user.getFullName().isBlank() || user.getNickName().isBlank()){
             return new ResponseEntity<>(new NullFieldsException("Warning! Fields cannot be null. Please, complete all credentials."), HttpStatus.BAD_REQUEST);
         }else if(repository.findById(user.getNickName()).isPresent()){
             return new ResponseEntity<>(new BusyCredentialsException("The nickname is associated with an existing account. Please try again."), HttpStatus.CONFLICT);
@@ -39,5 +37,9 @@ public class UserService {
 
     public List<User> findConnectedUsers(){
         return repository.findAllByStatus(Status.ONLINE);
+    }
+
+    public List<User> findDisconnectedUsers(){
+        return repository.findAllByStatus(Status.OFFLINE);
     }
 }

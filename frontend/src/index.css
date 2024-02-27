@@ -12,36 +12,69 @@ button, input {
 }
 
 .message-input {
-  border: 1.5px solid rgba(0,0,0, .3);
   width: 100%;
-  border-radius: 4px;
-  padding: 7px;
+  border-radius: 20px;
+  box-shadow: 0px 0px 4px 0px rgba(0, 0, 135, .35);
+  padding: 13px 52px;
   transition: .4s;
+  font-size: .9rem;
+  background-color: #fff;
 }
 
-.message-input:focus {
-  border: 1.5px solid rgba(0,0,0, .7);
-}
 
 .send-button {
   color: #fff;
-  border-radius: 4px;
-  padding: 5px 12px;
+  border-radius: 50%;
+  position: absolute;
+  padding: 5px 6px 6px 10px;
+  right: .5rem;
   transition: .4s;
-  background-color: rgba(0, 135, 0);
+  background-color: rgba(0, 0, 135);
   font-size: 1.1rem;
+}
+
+.send-button:hover {
+  background-color: rgba(0, 0, 135, .75);
+}
+
+.file-icon {
+  cursor: pointer;
+  position: absolute;
+  left: .5rem;
+  padding: 5px;
+  color: #fff;
+  border-radius: 50%;
+  background: rgb(136, 136, 196);
+  transition: .4s;
+}
+
+.file-icon:hover {
+  background-color: rgba(0, 0, 135);
 }
 
 .logout-button {
   font-size: 1.1rem;
   transition: .4s;
+  color: rgb(0, 0, 86);
 }
 
 .logout-icon {
-  color: rgba(0, 0, 0, 0.9);
+  color: rgb(0, 0, 86);
   margin-left: .2rem;
 }
 
-.send-button:hover {
-  background-color: rgba(0, 135, 0, .75);
+.users-list::-webkit-scrollbar, #chat-container::-webkit-scrollbar {
+  display: none;
+}
+
+.message-container {
+  color: #fff;
+  background-color: rgba(3, 3, 162, 0.792);
+  max-width: 300px;
+  padding: .7rem 1rem;
+  border-radius: 10px;
+}
+
+.sender-message {
+  align-self: flex-end;
 }

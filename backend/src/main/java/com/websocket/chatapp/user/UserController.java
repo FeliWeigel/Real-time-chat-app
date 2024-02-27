@@ -1,6 +1,5 @@
 package com.websocket.chatapp.user;
 
-
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -34,7 +33,12 @@ public class UserController {
     }
 
     @GetMapping("/users")
-    public ResponseEntity<List<User>> findConnectedUsers(){
+    public ResponseEntity<List<User>> findOnlineUsers(){
         return ResponseEntity.ok(userService.findConnectedUsers());
+    }
+
+    @GetMapping("/offline_users")
+    public ResponseEntity<List<User>> findOfflineUsers(){
+        return ResponseEntity.ok(userService.findDisconnectedUsers());
     }
 }

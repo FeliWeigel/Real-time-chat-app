@@ -1,12 +1,9 @@
 spring:
   data:
     mongodb:
-      authentication-database: admin
-      username: wmdevelop
-      password: wmdevelop
       host: localhost
       port: 27017
       database: chat_app
-
 server:
   port: 8088
+

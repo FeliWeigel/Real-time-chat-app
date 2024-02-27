@@ -14,9 +14,9 @@ import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerCo
 
 import java.util.List;
 
-@CrossOrigin("http://localhost:5173")
 @Configuration
 @EnableWebSocketMessageBroker
+@CrossOrigin("http://localhost:5173")
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     @Override
@@ -29,7 +29,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         registry.addEndpoint("/ws")
-                .setAllowedOrigins("*")
+                .setAllowedOrigins("http://localhost:5173")
                 .setAllowedOriginPatterns("*")
                 .withSockJS();
     }
@@ -41,8 +41,6 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
         MappingJackson2MessageConverter converter = new MappingJackson2MessageConverter();
         converter.setObjectMapper(new ObjectMapper());
         converter.setContentTypeResolver(resolver);
-        messageConverters.add(new StringMessageConverter());
-        messageConverters.add(new ByteArrayMessageConverter());
         messageConverters.add(converter);
         return false;
     }
@@ -52,13 +50,14 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
         @Override
         public void addCorsMappings(CorsRegistry registry) {
             registry.addMapping("/**")
-                    .allowedOrigins("*")
+                    .allowedOrigins("http://localhost:5173")
                     .allowedOriginPatterns("*")
                     .allowedMethods("GET", "POST", "PUT", "PATCH", "DELETE", "HEAD")
                     .allowedHeaders("*")
                     .allowCredentials(true);
         }
     }
+
 
 }
 
