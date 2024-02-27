@@ -7,13 +7,28 @@ import {exit} from 'react-icons-kit/icomoon/exit'
 import {androidSend} from 'react-icons-kit/ionicons/androidSend'
 import {plusRound} from 'react-icons-kit/ionicons/plusRound'
 import axios from "axios"
-const ChatArea = ({connectedUsers, adminUser}) => {
+const ChatArea = ({connectedUsers, adminUser, stompClient}) => {
     const [selectedUser, setSelectedUser] = useState(null)
     const [selectedChatMessages, setSelectedChatMessages] = useState([])
+    const [message, setMessage] = useState("")
     const urlBase = "http://localhost:8088"
+    const messageForm = document.getElementById('message-form')
+    const messageInput = document.querySelector(".message-input")
+    const chat = document.getElementById('chat-container')
 
     const sendMessage = (e) => {
         e.preventDefault()
+        if(adminUser && message){
+            const chatMessage = {
+                senderId: adminUser.nickName,
+                recipientId: selectedUser,
+                content: message.trim(),
+                timestamp: new Date()
+            }
+            stompClient.send('/app/chat', {}, JSON.stringify(chatMessage))
+            messageInput.value = ""
+            findSelectedChat()
+        }
     }
 
     const selectUserItem = (e) => {
@@ -23,7 +38,10 @@ const ChatArea = ({connectedUsers, adminUser}) => {
 
     const findSelectedChat = async () => {
         await axios.get(`${urlBase}/messages/${adminUser.nickName}/${selectedUser}`)
-        .then(res => setSelectedChatMessages(res.data))
+        .then(res => {
+            setSelectedChatMessages(res.data)
+            chat.scrollTop = chat.scrollHeight
+        })
     }
 
     return (
@@ -131,33 +149,30 @@ const ChatArea = ({connectedUsers, adminUser}) => {
                     height={'95%'}
                 >
                     <Box
-                        id="chat-container"
                         height={'90%'}
-                        padding={'2rem 1rem .8rem 1rem'}
-                        display={'flex'}
-                        flexDirection={'column'}
-                        rowGap={'.5rem'}
-                        overflow={'scroll'}
+                        padding={'.5rem 1.5rem .5rem 1rem'}
                     >
-                        <Typography className="message-container sender-message">Hi! What`s going on?</Typography>
-                        <Typography className="message-container recipient-message">Hi! I`m fine, work hard and break the pussy of your mom, you?</Typography>
-                        <Typography className="message-container recipient-message">Yeah, sure. I`m studying databases and IA.</Typography>
-                        <Typography className="message-container sender-message">Let`s go!</Typography>
-                        <Typography className="message-container sender-message">Congratulations boy.</Typography>
-                        <Typography className="message-container sender-message">Hi! What`s going on?</Typography>
-                        <Typography className="message-container recipient-message">Hi! I`m fine, work hard and break the pussy of your mom, you?</Typography>
-                        <Typography className="message-container recipient-message">Yeah, sure. I`m studying databases and IA.</Typography>
-                        <Typography className="message-container recipient-message">Let`s go!</Typography>
-                        <Typography className="message-container recipient-message">Congratulations boy.</Typography>
-                        <Typography className="message-container sender-message">Hi! What`s going on?</Typography>
-                        {selectedUser ? 
-                            <Box>
-                                {selectedChatMessages.map(message => {
-                                    return (
-                                        <p className={message.senderId == adminUser.nickName ? 'message-container sender-message' : 'message-container recipient-message'} key={message.id}>{message.content}</p>
-                                    )
-                                    })
-                                }
+                        {selectedUser !== null ? 
+                            <Box
+                                id="chat-container"
+                                display={'flex'}
+                                height={'100%'}
+                                flexDirection={'column'}
+                                padding={'0 1rem'}
+                                rowGap={'.5rem'}
+                                overflow={'scroll'}
+                            >
+                            {selectedChatMessages.map(message => {
+                                return (
+                                    <Typography 
+                                        className={message.senderId == adminUser.nickName ? 'message-container sender-message' : 'message-container recipient-message'} 
+                                        key={message.id}
+                                    >
+                                        {message.content}
+                                    </Typography>
+                                )
+                                })
+                            }
                             </Box>
                             : 
                             null
@@ -171,6 +186,7 @@ const ChatArea = ({connectedUsers, adminUser}) => {
                         }
                     </Box>
                     <Box 
+                        id="message-form"
                         onSubmit={sendMessage}
                         component={'form'}
                         display={'flex'}
@@ -180,7 +196,11 @@ const ChatArea = ({connectedUsers, adminUser}) => {
                         position={'relative'}
                     >
                     <Icon className="file-icon" icon={plusRound} size={20}></Icon>    
-                    <input className="message-input" placeholder="Enter your message here.."></input>
+                    <input 
+                        className="message-input" 
+                        placeholder="Enter your message here.."
+                        onChange={e => setMessage(e.target.value)}
+                    ></input>
                     <button type="submit" className="send-button">
                         <Icon icon={androidSend} size={19}></Icon>
                     </button>

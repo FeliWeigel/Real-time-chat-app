@@ -77,7 +77,11 @@ function App() {
     >
         {online ? 
         
-        <ChatArea connectedUsers={connectedUsers} adminUser={user}/>
+        <ChatArea 
+            connectedUsers={connectedUsers} 
+            adminUser={user}
+            stompClient={stompClient}
+        />
         : 
         
         <Box

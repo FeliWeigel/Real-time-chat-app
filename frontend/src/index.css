@@ -21,7 +21,6 @@ button, input {
   background-color: #fff;
 }
 
-
 .send-button {
   color: #fff;
   border-radius: 50%;
@@ -70,11 +69,16 @@ button, input {
 .message-container {
   color: #fff;
   background-color: rgba(3, 3, 162, 0.792);
-  max-width: 300px;
-  padding: .7rem 1rem;
+  max-width: 270px;
+  width: auto;
+  padding: .6rem 1rem;
   border-radius: 10px;
 }
 
 .sender-message {
   align-self: flex-end;
+}
+
+.recipient-message {
+  align-self: flex-start;
 }

@@ -11,7 +11,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @Builder
 public class ChatRoom {
     @Id
-    private Long id;
+    private String id;
     private String chatId;
     private String senderId;
     private String recipientId;
