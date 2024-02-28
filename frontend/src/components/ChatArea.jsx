@@ -24,15 +24,14 @@ const ChatArea = ({connectedUsers, adminUser, stompClient}) => {
     const findSelectedChat = async () => {
         await axios.get(`${urlBase}/messages/${adminUser.nickName}/${selectedUser}`)
         .then(res => {
-            
             setSelectedChatMessages(res.data)
-            if((chat.scrollHeight - chat.scrollTop) < 440){
+            if((chat.scrollHeight - chat.scrollTop) < 500){
                 chat.scrollTop = chat.scrollHeight
             }
         })
     }
 
-    if (!updatingMessages) {
+    if (selectedUser && !updatingMessages) {
         findSelectedChat();
     }
     
@@ -105,9 +104,9 @@ const ChatArea = ({connectedUsers, adminUser, stompClient}) => {
                             className="users-list"
                             sx={{
                                 height:'300px',
-                                marginBottom: '.8rem',
+                                marginBottom: '.6rem',
                                 overflow: 'scroll',
-                                padding: '0',
+                                padding: '.3rem .2rem',
                             }}
                         >
                             {connectedUsers.map(user => {
@@ -116,11 +115,14 @@ const ChatArea = ({connectedUsers, adminUser, stompClient}) => {
                                         key={user.nickName}
                                         sx={{
                                             cursor: 'pointer',
-                                            padding: '.5rem .2rem',
-                                            borderBottom: '1px solid rgba(0,0, 250, .15)',
+                                            padding: '.6rem 1rem',
+                                            borderBottomRightRadius: '20px',
+                                            borderTopLeftRadius: '20px',
+                                            marginBottom: '.8rem',
+                                            boxShadow: '0px 0px 3.5px -1px rgba(0,0, 250, .5)',
                                             transition: '.4s',
                                             ":hover": {
-                                                borderBottom: '1px solid rgba(0,0, 200, .75)'
+                                                boxShadow: '0px 0px 4.5px -1px rgba(0,0, 250)',  
                                             }
                                         }}
                                     >
@@ -139,10 +141,19 @@ const ChatArea = ({connectedUsers, adminUser, stompClient}) => {
                                                 marginRight: '.7rem'
                                             }}
                                         >{`${user.nickName.charAt(0)}${user.nickName.charAt(1)}`}</Typography>
-                                        <Typography 
-                                            onClick={selectUserItem}
-                                            typography={'p'}
-                                        >{user.nickName}</Typography>
+                                        <Box
+                                            display={'flex'}
+                                            flexDirection={'column'}
+                                        >
+                                            <Typography 
+                                                onClick={selectUserItem}
+                                                typography={'p'}
+                                            >{user.nickName}</Typography>
+                                            <Typography 
+                                                typography={'p'}
+                                                fontSize={'.7rem'}    
+                                            >{user.status}</Typography>
+                                        </Box>
                                     </ListItem>
                                 )
                             })}
@@ -165,6 +176,7 @@ const ChatArea = ({connectedUsers, adminUser, stompClient}) => {
                             <Box
                                 id="chat-container"
                                 display={'flex'}
+                                width={'100%'}
                                 height={'100%'}
                                 flexDirection={'column'}
                                 padding={'1rem 0 .7rem 1rem'}
@@ -172,16 +184,36 @@ const ChatArea = ({connectedUsers, adminUser, stompClient}) => {
                                 overflow={'scroll'}
                             >
                             {selectedChatMessages.map(message => {
-                                const timestamp = new Date(message.timestamp);
-                                const messageHour = timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                                const timestamp = new Date(message.timestamp)
+                                const messageHour = timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                                
                                 return (
-                                    <Typography 
-                                        className={message.senderId == adminUser.nickName ? 'message-container sender-message' : 'message-container recipient-message'} 
-                                        key={message.id}
+                                   <Box 
+                                        key={message.id} 
+                                        className={message.senderId == adminUser.nickName ? 'message-container sender-message' : 'message-container recipient-message'}
                                     >
-                                        {message.content}
-                                        <span>{messageHour}</span>
-                                    </Typography>
+                                        <Typography 
+                                            typography={'p'}
+                                            fontSize={'1.05rem'}
+                                            marginBottom={'.2rem'}
+                                            height={'auto'}
+                                            display={'flex'}
+                                            sx={{
+                                                overflowWrap: 'anywhere'
+                                            }}
+                                        >
+                                            {message.content}
+                                            
+                                        </Typography>
+                                        <Typography 
+                                            typography={'p'}
+                                            fontSize={'.8rem'}
+                                            textAlign={'right'}
+                                            color={message.senderId == adminUser.nickName ? 'rgba(255,255,255, .7)' : 'rgba(0,0,0, .6)'}
+                                        >
+                                            {messageHour}
+                                        </Typography>
+                                   </Box>
                                 )
                                 })
                             }

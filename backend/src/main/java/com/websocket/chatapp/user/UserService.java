@@ -1,6 +1,5 @@
 package com.websocket.chatapp.user;
 
-import com.websocket.chatapp.exceptions.BusyCredentialsException;
 import com.websocket.chatapp.exceptions.NullFieldsException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -18,8 +17,6 @@ public class UserService {
     public ResponseEntity<Object> registerUser(User user){
         if(user.getFullName().isBlank() || user.getNickName().isBlank()){
             return new ResponseEntity<>(new NullFieldsException("Warning! Fields cannot be null. Please, complete all credentials."), HttpStatus.BAD_REQUEST);
-        }else if(repository.findById(user.getNickName()).isPresent()){
-            return new ResponseEntity<>(new BusyCredentialsException("The nickname is associated with an existing account. Please try again."), HttpStatus.CONFLICT);
         }
 
         user.setStatus(Status.ONLINE);
