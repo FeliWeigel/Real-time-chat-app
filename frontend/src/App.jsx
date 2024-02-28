@@ -16,8 +16,7 @@ function App() {
     status: "ONLINE"
   })
   const [stompClient, setStompClient] = useState(null)
-  const [connectedUsers, setConnectedUsers] = useState([])
-  const [online, setOnline] = useState(false)
+  const [connectedUsers, setConnectedUsers] = useState(null)
   const urlBase = "http://localhost:8088"
 
   const handleConnection = (e) => {
@@ -56,7 +55,6 @@ function App() {
       await axios.get(`${urlBase}/users`)
       .then(res => {
           setConnectedUsers(res.data.filter(userConnected => userConnected.nickName != user.nickName))
-          setOnline(true)
       })
       .catch(err => console.log(err))
   }
@@ -70,12 +68,12 @@ function App() {
   }
   return (
     <Box
-    height={'100vh'}
-    display={'flex'}
-    alignItems={'center'}
-    justifyContent={'center'} 
+        height={'100vh'}
+        display={'flex'}
+        alignItems={'center'}
+        justifyContent={'center'} 
     >
-        {online ? 
+        {connectedUsers != null ? 
         
         <ChatArea 
             connectedUsers={connectedUsers} 
@@ -85,6 +83,7 @@ function App() {
         : 
         
         <Box
+            id="register-container"
             height={'80vh'}
             display={'flex'}
             flexDirection={'column'}
@@ -96,7 +95,7 @@ function App() {
                 typography={'h3'}
                 fontSize={'2.1rem'}
                 marginBottom={'1.7rem'}
-                color={"rgba(0, 70, 0, .9)"}
+                color={"rgba(0, 0, 80)"}
                 position={'relative'}
                 sx={{
                     ":before": {
@@ -106,10 +105,10 @@ function App() {
                         left: '21%',
                         width: '220px',
                         height: '1px',
-                        background: 'rgba(0, 180, 0, .2)'
+                        background: 'rgba(0, 0, 200, .2)'
                     }
                 }}
-            >Register new user to chat!</Typography>
+            >Register and enter chat!</Typography>
             <Box 
                 onSubmit={handleConnection}
                 component={'form'}
@@ -118,10 +117,10 @@ function App() {
                 flexDirection={'column'}
                 rowGap={'1.2rem'}
                 height={'270px'}
-                boxShadow={'0px 0px 3px 0px rgba(0, 175, 0)'}
+                boxShadow={'0px 0px 3px 0px rgba(0, 0, 120)'}
+                borderRadius={'10px'}
             >
                 <TextField
-                    id="text-field"
                     label="NickName"
                     type="text" 
                     name="nickName"
@@ -138,10 +137,10 @@ function App() {
                     type="submit"
                     sx={{
                         color: '#fff',
-                        background: 'rgba(0, 175, 0, .9)',
-                        border: '1px solid rgba(0, 175, 0, .9)',
+                        backgroundColor: 'rgba(0, 0, 120)',
+                        borderRadius: '7px',
                         ":hover": {
-                            background: 'rgba(0, 175, 0, .7)'
+                            background: 'rgba(0, 0, 120, .8)'
                         }
                     }}
                 >Enter chatroom</Button>

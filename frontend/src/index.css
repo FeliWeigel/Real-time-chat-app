@@ -67,18 +67,21 @@ button, input {
 }
 
 .message-container {
-  color: #fff;
-  background-color: rgba(3, 3, 162, 0.792);
   max-width: 270px;
   width: auto;
   padding: .6rem 1rem;
   border-radius: 10px;
+  box-shadow: 0px 0px 5px 0px rgba(0, 0, 135, .35);
 }
 
 .sender-message {
   align-self: flex-end;
+  color: #fff;
+  background-color: rgba(3, 3, 162, 0.792);
 }
 
 .recipient-message {
   align-self: flex-start;
+  background-color: #fff;
+  color: rgba(0, 0, 0, 0.823);
 }

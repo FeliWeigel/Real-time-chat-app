@@ -1,6 +1,5 @@
 package com.websocket.chatapp.chatroom;
 
-
 import lombok.Builder;
 import lombok.Data;
 import org.springframework.data.annotation.Id;

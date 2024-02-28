@@ -11,11 +11,31 @@ const ChatArea = ({connectedUsers, adminUser, stompClient}) => {
     const [selectedUser, setSelectedUser] = useState(null)
     const [selectedChatMessages, setSelectedChatMessages] = useState([])
     const [message, setMessage] = useState("")
+    const [updatingMessages, setUpdatingMessages] = useState(false);
     const urlBase = "http://localhost:8088"
-    const messageForm = document.getElementById('message-form')
     const messageInput = document.querySelector(".message-input")
     const chat = document.getElementById('chat-container')
 
+    const selectUserItem = (e) => {
+        setSelectedUser(e.target.textContent)
+        findSelectedChat()
+    }
+
+    const findSelectedChat = async () => {
+        await axios.get(`${urlBase}/messages/${adminUser.nickName}/${selectedUser}`)
+        .then(res => {
+            
+            setSelectedChatMessages(res.data)
+            if((chat.scrollHeight - chat.scrollTop) < 440){
+                chat.scrollTop = chat.scrollHeight
+            }
+        })
+    }
+
+    if (!updatingMessages) {
+        findSelectedChat();
+    }
+    
     const sendMessage = (e) => {
         e.preventDefault()
         if(adminUser && message){
@@ -27,21 +47,11 @@ const ChatArea = ({connectedUsers, adminUser, stompClient}) => {
             }
             stompClient.send('/app/chat', {}, JSON.stringify(chatMessage))
             messageInput.value = ""
+            setMessage("")
+            setUpdatingMessages(true)
             findSelectedChat()
+            setUpdatingMessages(false)
         }
-    }
-
-    const selectUserItem = (e) => {
-        setSelectedUser(e.target.textContent)
-        findSelectedChat()
-    }
-
-    const findSelectedChat = async () => {
-        await axios.get(`${urlBase}/messages/${adminUser.nickName}/${selectedUser}`)
-        .then(res => {
-            setSelectedChatMessages(res.data)
-            chat.scrollTop = chat.scrollHeight
-        })
     }
 
     return (
@@ -56,7 +66,6 @@ const ChatArea = ({connectedUsers, adminUser, stompClient}) => {
                 backgroundColor: 'rgba(0,0, 110,  .9)'
             }}
         >   
-            
             <Box
                 width={'97%'}
                 height={'95%'}
@@ -150,7 +159,7 @@ const ChatArea = ({connectedUsers, adminUser, stompClient}) => {
                 >
                     <Box
                         height={'90%'}
-                        padding={'.5rem 1.5rem .5rem 1rem'}
+                        padding={'1rem 1.5rem 0 1rem'}
                     >
                         {selectedUser !== null ? 
                             <Box
@@ -158,31 +167,34 @@ const ChatArea = ({connectedUsers, adminUser, stompClient}) => {
                                 display={'flex'}
                                 height={'100%'}
                                 flexDirection={'column'}
-                                padding={'0 1rem'}
-                                rowGap={'.5rem'}
+                                padding={'1rem 0 .7rem 1rem'}
+                                rowGap={'.7rem'}
                                 overflow={'scroll'}
                             >
                             {selectedChatMessages.map(message => {
+                                const timestamp = new Date(message.timestamp);
+                                const messageHour = timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
                                 return (
                                     <Typography 
                                         className={message.senderId == adminUser.nickName ? 'message-container sender-message' : 'message-container recipient-message'} 
                                         key={message.id}
                                     >
                                         {message.content}
+                                        <span>{messageHour}</span>
                                     </Typography>
                                 )
                                 })
                             }
                             </Box>
                             : 
-                            null
-                            /*<Typography 
+                            
+                            <Typography 
                                 typography={'p'} 
                                 textAlign={'center'}
                                 paddingTop={'2rem'}
                                 fontSize={'1.6rem'}
                                 color={'rgba(0,0, 90)'}
-                            >Select a new chat!</Typography>*/
+                            >Select a chat!</Typography>
                         }
                     </Box>
                     <Box 
