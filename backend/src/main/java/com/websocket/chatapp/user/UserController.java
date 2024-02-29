@@ -33,6 +33,11 @@ public class UserController {
     }
 
     @GetMapping("/users")
+    public ResponseEntity<List<User>> findAllUsers(){
+        return ResponseEntity.ok(userService.findAllUsers());
+    }
+
+    @GetMapping("/online_users")
     public ResponseEntity<List<User>> findOnlineUsers(){
         return ResponseEntity.ok(userService.findConnectedUsers());
     }

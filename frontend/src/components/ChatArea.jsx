@@ -1,20 +1,23 @@
 /* eslint-disable react/prop-types */
-import { useState } from "react"
+import { useRef, useState } from "react"
+
+import axios from "axios"
 
 import { Box, List, ListItem, Typography } from "@mui/material"
 import Icon from "react-icons-kit"
-import {exit} from 'react-icons-kit/icomoon/exit'
+import {logOut} from 'react-icons-kit/ionicons/logOut'
 import {androidSend} from 'react-icons-kit/ionicons/androidSend'
 import {plusRound} from 'react-icons-kit/ionicons/plusRound'
-import axios from "axios"
-const ChatArea = ({connectedUsers, adminUser, stompClient}) => {
+import {iosSearchStrong} from 'react-icons-kit/ionicons/iosSearchStrong'
+
+const ChatArea = ({usersList, adminUser, stompClient}) => {
     const [selectedUser, setSelectedUser] = useState(null)
     const [selectedChatMessages, setSelectedChatMessages] = useState([])
     const [message, setMessage] = useState("")
     const [updatingMessages, setUpdatingMessages] = useState(false);
     const urlBase = "http://localhost:8088"
-    const messageInput = document.querySelector(".message-input")
-    const chat = document.getElementById('chat-container')
+    const messageInput = useRef(null)
+    const chat = useRef(null)
 
     const selectUserItem = (e) => {
         setSelectedUser(e.target.textContent)
@@ -30,10 +33,6 @@ const ChatArea = ({connectedUsers, adminUser, stompClient}) => {
             }
         })
     }
-
-    if (selectedUser && !updatingMessages) {
-        findSelectedChat();
-    }
     
     const sendMessage = (e) => {
         e.preventDefault()
@@ -45,12 +44,28 @@ const ChatArea = ({connectedUsers, adminUser, stompClient}) => {
                 timestamp: new Date()
             }
             stompClient.send('/app/chat', {}, JSON.stringify(chatMessage))
+            console.log(messageInput)
             messageInput.value = ""
             setMessage("")
             setUpdatingMessages(true)
             findSelectedChat()
             setUpdatingMessages(false)
         }
+    }
+
+    const onLogout = () => {
+        if(stompClient){
+            stompClient.send(
+                "/app/user.disconnectUser",
+                {},
+                JSON.stringify({nickName: adminUser.nickName, fullName: adminUser.fullName, status: 'OFFLINE'})
+            )
+            window.location.reload()
+        }
+    }
+
+    if (selectedUser && !updatingMessages) {
+        findSelectedChat();
     }
 
     return (
@@ -79,11 +94,10 @@ const ChatArea = ({connectedUsers, adminUser, stompClient}) => {
                 <Box
                     width={'30%'}
                     height={'100%'}
-                    padding={'1rem 1.5rem 1.5rem 1.5rem'}
+                    padding={'.8rem 1.5rem 1.5rem 1.5rem'}
                     borderRadius={'25px'}
                     display={'flex'}
                     flexDirection={'column'}
-                    justifyContent={'space-between'}
                     sx={{
                         backgroundColor: '#fff',
                         boxShadow: '0px 0px 20px 0px rgba(0,0, 200, .2)'
@@ -92,30 +106,43 @@ const ChatArea = ({connectedUsers, adminUser, stompClient}) => {
                     <Box>
                         <Typography 
                             typography={'h5'}
-                            fontSize={'1.3rem'}
-                            marginBottom={'.7rem'}
+                            fontSize={'1.2rem'}
                         >
-                            One to one chat application
+                            Chat application
                         </Typography>
-                        <Typography typography={'p'} marginBottom={'.5rem'}>
-                            Users online: {connectedUsers.length}
-                        </Typography>
+                        <Box
+                            sx={{
+                                width: '100%',
+                                height: '1px',
+                                background: 'rgba(0,0, 250, .2)',
+                                margin: '.35rem 0'
+                            }}
+                        ></Box>
+                        <Box
+                            component={'form'}
+                            position={'relative'}
+                            display={'flex'}
+                            alignItems={'center'}
+                        >
+                            <input type="text" placeholder="Search.." className="search-input" />
+                            <Icon className="search-icon" icon={iosSearchStrong} size={19}></Icon>
+                        </Box>
                         <List
                             className="users-list"
                             sx={{
                                 height:'300px',
-                                marginBottom: '.6rem',
+                                marginBottom: '1.3rem',
                                 overflow: 'scroll',
                                 padding: '.3rem .2rem',
                             }}
                         >
-                            {connectedUsers.map(user => {
+                            {usersList.map(user => {
                                 return (
                                     <ListItem 
                                         key={user.nickName}
                                         sx={{
                                             cursor: 'pointer',
-                                            padding: '.6rem 1rem',
+                                            padding: '.4.5rem 1rem',
                                             borderBottomRightRadius: '20px',
                                             borderTopLeftRadius: '20px',
                                             marginBottom: '.8rem',
@@ -130,8 +157,8 @@ const ChatArea = ({connectedUsers, adminUser, stompClient}) => {
                                             sx={{
                                                 background: 'rgba(0,0, 120,  .9)',
                                                 color: '#fff',
-                                                width: '34px',
-                                                height: '32px',
+                                                width: '35px',
+                                                height: '35px',
                                                 display: 'flex',
                                                 alignItems: 'center',
                                                 justifyContent: 'center',
@@ -148,11 +175,31 @@ const ChatArea = ({connectedUsers, adminUser, stompClient}) => {
                                             <Typography 
                                                 onClick={selectUserItem}
                                                 typography={'p'}
+                                                fontSize={'.9rem'}
                                             >{user.nickName}</Typography>
-                                            <Typography 
-                                                typography={'p'}
-                                                fontSize={'.7rem'}    
-                                            >{user.status}</Typography>
+                                            <Box
+                                                display={'flex'}
+                                                columnGap={'.3rem'}
+                                                alignItems={'center'}
+                                            >
+                                                <Box
+                                                    width={'6px'}
+                                                    height={'6px'}
+                                                    borderRadius={'50%'}
+                                                    
+                                                    sx={{
+                                                        backgroundColor: `${user.status === 'ONLINE' ? 'rgb(0, 170, 0)' : 'rgba(0,0,0, .5)'}`
+                                                    }}
+                                                ></Box>
+                                                <Typography 
+                                                    typography={'p'}
+                                                    fontSize={'.8rem'} 
+                                                    color={'rgba(0,0,0, .7)'}
+                                                    textTransform={'lowercase'}   
+                                                >
+                                                    {user.status}
+                                                </Typography>
+                                            </Box>
                                         </Box>
                                     </ListItem>
                                 )
@@ -160,8 +207,11 @@ const ChatArea = ({connectedUsers, adminUser, stompClient}) => {
                         </List>
                     </Box>
 
-                    <button className="logout-button">
-                        Log out <Icon className="logout-icon" icon={exit} size={14}></Icon>
+                    <button
+                        className="logout-button"
+                        onClick={onLogout}
+                    >
+                        Log out <Icon className="logout-icon" icon={logOut} size={16}></Icon>
                     </button>
                 </Box>
                 <Box
@@ -175,6 +225,7 @@ const ChatArea = ({connectedUsers, adminUser, stompClient}) => {
                         {selectedUser !== null ? 
                             <Box
                                 id="chat-container"
+                                ref={chat}
                                 display={'flex'}
                                 width={'100%'}
                                 height={'100%'}
@@ -226,29 +277,34 @@ const ChatArea = ({connectedUsers, adminUser, stompClient}) => {
                                 paddingTop={'2rem'}
                                 fontSize={'1.6rem'}
                                 color={'rgba(0,0, 90)'}
-                            >Select a chat!</Typography>
+                            >No chat selected.</Typography>
                         }
                     </Box>
-                    <Box 
-                        id="message-form"
-                        onSubmit={sendMessage}
-                        component={'form'}
-                        display={'flex'}
-                        columnGap={'.9rem'}
-                        alignItems={'center'}
-                        marginTop={'1.2rem'}
-                        position={'relative'}
-                    >
-                    <Icon className="file-icon" icon={plusRound} size={20}></Icon>    
-                    <input 
-                        className="message-input" 
-                        placeholder="Enter your message here.."
-                        onChange={e => setMessage(e.target.value)}
-                    ></input>
-                    <button type="submit" className="send-button">
-                        <Icon icon={androidSend} size={19}></Icon>
-                    </button>
-                </Box>
+                    {selectedUser ?   
+                        <Box 
+                            id="message-form"
+                            onSubmit={sendMessage}
+                            component={'form'}
+                            display={'flex'}
+                            columnGap={'.9rem'}
+                            alignItems={'center'}
+                            marginTop={'1.2rem'}
+                            position={'relative'}
+                        >
+                            <Icon className="file-icon" icon={plusRound} size={20}></Icon>    
+                            <input 
+                                ref={messageInput}
+                                className="message-input" 
+                                placeholder="Enter your message here.."
+                                onChange={e => setMessage(e.target.value)}
+                            ></input>
+                            <button type="submit" className="send-button">
+                                <Icon icon={androidSend} size={19}></Icon>
+                            </button>
+                        </Box>
+                        : 
+                        null
+                    }
                 </Box>
             </Box>
         </Box>

@@ -11,14 +11,36 @@ button, input {
   background: none;
 }
 
-.message-input {
+.message-input, .search-input {
   width: 100%;
   border-radius: 20px;
-  box-shadow: 0px 0px 4px 0px rgba(0, 0, 135, .35);
-  padding: 13px 52px;
   transition: .4s;
-  font-size: .9rem;
+}
+
+.message-input {
   background-color: #fff;
+  padding: 13px 52px;
+  font-size: .9rem;
+  box-shadow: 0px 0px 4px 0px rgba(0, 0, 135, .35);
+}
+
+.search-input {
+  background-color: rgb(243, 243, 255);
+  font-size: .85rem;
+  padding: .45rem 2.5rem .45rem 1rem;
+  margin: .5rem 0;
+  box-shadow: 0px 0px 2px 0px rgba(0, 0, 135, .35);
+  transition: .4s;
+}
+
+.search-input:focus {
+  box-shadow: 0px 0px 2.5px 0px rgba(0, 0, 135, 0.866);
+}
+
+.search-icon {
+  position: absolute;
+  right: .7rem;
+  color: rgba(0, 0, 0, 0.734);
 }
 
 .send-button {
@@ -54,7 +76,18 @@ button, input {
 .logout-button {
   font-size: 1.1rem;
   transition: .4s;
+  padding: .3rem 0;
+  width: 180px;
+  margin: 0 auto;
   color: rgb(0, 0, 86);
+  border-bottom-right-radius: 15px;
+  border-top-left-radius: 15px;
+  box-shadow: 0px 0px 3.5px 0px rgba(1, 1, 113, 0.736);
+  transition: .4s;
+}
+
+.logout-button:hover {
+  box-shadow: 0px 0px 4.5px 0px rgba(1, 1, 113, 0.899);  
 }
 
 .logout-icon {

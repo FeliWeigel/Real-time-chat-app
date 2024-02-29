@@ -16,7 +16,7 @@ function App() {
         status: "ONLINE"
     })
     const [stompClient, setStompClient] = useState(null)
-    const [connectedUsers, setConnectedUsers] = useState(null)
+    const [users, setUsers] = useState(null)
     const [error, setError] = useState(false)
     const urlBase = "http://localhost:8088"
 
@@ -42,12 +42,13 @@ function App() {
 
     const onConnected = () => {
         if(stompClient){
-            stompClient.subscribe(`/user/${user.nickName}/queue/messages`, onMessageReceived)
-            stompClient.subscribe(`/user/topic`, onMessageReceived)
+            stompClient.subscribe(`/user/${user.nickName}/queue/messages`)
+            stompClient.subscribe(`/user/topic`)
             
             setUser({
                 ...user,
-                nickName: user.nickName.trim()
+                nickName: user.nickName.trim(),
+                status: 'ONLINE'
             })
 
             setError(false)
@@ -56,24 +57,23 @@ function App() {
                 {},
                 JSON.stringify(user)
             )
-            findConnectedUsers()
+            findUsers()
         }
     }
 
-    const findConnectedUsers = async () => {
+    const findUsers = async () => {
         await axios.get(`${urlBase}/users`)
         .then(res => {
-            setConnectedUsers(res.data.filter(userConnected => userConnected.nickName != user.nickName))
+            const onlineUsers = (res.data.filter(userFiltered => userFiltered.status === 'ONLINE' && userFiltered.nickName != user.nickName))
+            const offlineUsers = (res.data.filter(userFiltered => userFiltered.status === 'OFFLINE' && userFiltered.nickName != user.nickName))
+            const allUsers = onlineUsers.concat(offlineUsers)
+            setUsers(allUsers)
         })
         .catch(err => console.log(err))
     }
 
     const onError = () => {
         setError(true)
-    }
-
-    const onMessageReceived = () => {
-
     }
 
     return (
@@ -83,10 +83,10 @@ function App() {
             alignItems={'center'}
             justifyContent={'center'}
         >
-            {connectedUsers != null ? 
+            {users != null ? 
             
             <ChatArea 
-                connectedUsers={connectedUsers} 
+                usersList={users} 
                 adminUser={user}
                 stompClient={stompClient}
             />
