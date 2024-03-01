@@ -19,7 +19,7 @@ const ChatArea = ({user}) => {
     const [selectedChatMessages, setSelectedChatMessages] = useState([])
     const [message, setMessage] = useState("")
     const messageInput = useRef(null)
-    const chat = useRef(null)
+    const chat = document.getElementById('chat-container')
     const [stompClient, setStompClient] = useState(null)
 
     useEffect(() => {
@@ -30,9 +30,10 @@ const ChatArea = ({user}) => {
             const onReceivedMessage = (payload) => {
                 if(payload){
                     const receivedMessage = JSON.parse(payload.body)
-                    console.log("EJECUTANDO123mil...")
                     setSelectedChatMessages((prevMessages) => [...prevMessages, receivedMessage])  
                 }
+
+                findSelectedChat()
             }
 
             if(client){
@@ -74,10 +75,11 @@ const ChatArea = ({user}) => {
         findSelectedChat()
     }
 
-    const findSelectedChat = () => {
-        axios.get(`${urlBase}/messages/${user.nickName}/${selectedUser}`)
+    const findSelectedChat = async () => {
+        await axios.get(`${urlBase}/messages/${user.nickName}/${selectedUser}`)
         .then(res => {
-            setSelectedChatMessages(res.data)           
+            setSelectedChatMessages(res.data) 
+            chat.scrollTop = chat.scrollHeight
         })
     }
     
@@ -94,7 +96,6 @@ const ChatArea = ({user}) => {
             setMessage("")
             findSelectedChat()
             
-            chat.scrollTop = chat.scrollHeight
             e.preventDefault()
         }
     }
@@ -279,7 +280,7 @@ const ChatArea = ({user}) => {
                             {selectedChatMessages.map(message => {
                                 const timestamp = new Date(message.timestamp)
                                 const messageHour = timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-                                
+
                                 return (
                                    <Box 
                                         key={message.id} 
