@@ -1,6 +1,8 @@
 /* eslint-disable react/prop-types */
-import { useRef, useState } from "react"
+import {useEffect, useRef, useState} from "react"
 
+import SockJS from "sockjs-client"
+import Stomp from "stompjs"
 import axios from "axios"
 
 import { Box, List, ListItem, Typography } from "@mui/material"
@@ -10,46 +12,90 @@ import {androidSend} from 'react-icons-kit/ionicons/androidSend'
 import {plusRound} from 'react-icons-kit/ionicons/plusRound'
 import {iosSearchStrong} from 'react-icons-kit/ionicons/iosSearchStrong'
 
-const ChatArea = ({usersList, adminUser, stompClient}) => {
+const ChatArea = ({user}) => {
+    const urlBase = "http://localhost:8088"
+    const [users, setUsers] = useState([])
     const [selectedUser, setSelectedUser] = useState(null)
     const [selectedChatMessages, setSelectedChatMessages] = useState([])
     const [message, setMessage] = useState("")
-    const [updatingMessages, setUpdatingMessages] = useState(false);
-    const urlBase = "http://localhost:8088"
     const messageInput = useRef(null)
     const chat = useRef(null)
+    const [stompClient, setStompClient] = useState(null)
+
+    useEffect(() => {
+        if(user){
+            const socket = new SockJS(`${urlBase}/ws`)
+            let client = Stomp.over(socket)
+
+            const onReceivedMessage = (payload) => {
+                if(payload){
+                    const receivedMessage = JSON.parse(payload.body)
+                    console.log("EJECUTANDO123mil...")
+                    setSelectedChatMessages((prevMessages) => [...prevMessages, receivedMessage])  
+                }
+            }
+
+            if(client){
+                client.connect({}, () => {
+                    client.subscribe(`/user/${user.nickName}/queue/messages`, onReceivedMessage)
+                    client.subscribe(`/user/topic`, onReceivedMessage)
+    
+                    client.send(
+                        '/app/user.addUser',
+                        {},
+                        JSON.stringify(user)
+                    )
+                    
+                    setStompClient(client)
+                    findUsers()
+    
+                    return () => {
+                        client.disconnect();
+                    };
+                }, (err) => console.log(err))
+            }
+        }
+        
+    },[])
+
+    const findUsers = async () => {
+        await axios.get(`${urlBase}/users`)
+        .then(res => {
+            const onlineUsers = (res.data.filter(userFiltered => userFiltered.status === 'ONLINE' && userFiltered.nickName != user.nickName))
+            const offlineUsers = (res.data.filter(userFiltered => userFiltered.status === 'OFFLINE' && userFiltered.nickName != user.nickName))
+            const allUsers = onlineUsers.concat(offlineUsers)
+            setUsers(allUsers)
+        })
+        .catch(err => console.log(err))
+    }
 
     const selectUserItem = (e) => {
         setSelectedUser(e.target.textContent)
         findSelectedChat()
     }
 
-    const findSelectedChat = async () => {
-        await axios.get(`${urlBase}/messages/${adminUser.nickName}/${selectedUser}`)
+    const findSelectedChat = () => {
+        axios.get(`${urlBase}/messages/${user.nickName}/${selectedUser}`)
         .then(res => {
-            setSelectedChatMessages(res.data)
-            if((chat.scrollHeight - chat.scrollTop) < 500){
-                chat.scrollTop = chat.scrollHeight
-            }
+            setSelectedChatMessages(res.data)           
         })
     }
     
     const sendMessage = (e) => {
-        e.preventDefault()
-        if(adminUser && message){
+        if(user && message){
             const chatMessage = {
-                senderId: adminUser.nickName,
+                senderId: user.nickName,
                 recipientId: selectedUser,
                 content: message.trim(),
                 timestamp: new Date()
             }
             stompClient.send('/app/chat', {}, JSON.stringify(chatMessage))
-            console.log(messageInput)
             messageInput.value = ""
             setMessage("")
-            setUpdatingMessages(true)
             findSelectedChat()
-            setUpdatingMessages(false)
+            
+            chat.scrollTop = chat.scrollHeight
+            e.preventDefault()
         }
     }
 
@@ -58,14 +104,10 @@ const ChatArea = ({usersList, adminUser, stompClient}) => {
             stompClient.send(
                 "/app/user.disconnectUser",
                 {},
-                JSON.stringify({nickName: adminUser.nickName, fullName: adminUser.fullName, status: 'OFFLINE'})
+                JSON.stringify({nickName: user.nickName, fullName: user.fullName, status: 'OFFLINE'})
             )
             window.location.reload()
         }
-    }
-
-    if (selectedUser && !updatingMessages) {
-        findSelectedChat();
     }
 
     return (
@@ -136,7 +178,7 @@ const ChatArea = ({usersList, adminUser, stompClient}) => {
                                 padding: '.3rem .2rem',
                             }}
                         >
-                            {usersList.map(user => {
+                            {users.map(user => {
                                 return (
                                     <ListItem 
                                         key={user.nickName}
@@ -241,7 +283,7 @@ const ChatArea = ({usersList, adminUser, stompClient}) => {
                                 return (
                                    <Box 
                                         key={message.id} 
-                                        className={message.senderId == adminUser.nickName ? 'message-container sender-message' : 'message-container recipient-message'}
+                                        className={message.senderId == user.nickName ? 'message-container sender-message' : 'message-container recipient-message'}
                                     >
                                         <Typography 
                                             typography={'p'}
@@ -260,7 +302,7 @@ const ChatArea = ({usersList, adminUser, stompClient}) => {
                                             typography={'p'}
                                             fontSize={'.8rem'}
                                             textAlign={'right'}
-                                            color={message.senderId == adminUser.nickName ? 'rgba(255,255,255, .7)' : 'rgba(0,0,0, .6)'}
+                                            color={message.senderId == user.nickName ? 'rgba(255,255,255, .7)' : 'rgba(0,0,0, .6)'}
                                         >
                                             {messageHour}
                                         </Typography>
