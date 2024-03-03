@@ -31,6 +31,7 @@ function App() {
             setSuccess(true)
         }else {
             setError(true)
+            setSuccess(false)
         }
     }
 
@@ -42,7 +43,10 @@ function App() {
             justifyContent={'center'}
         >
            {
-            !error && !success ? 
+            !error && success ? 
+            
+                <ChatArea user={user}/> 
+                    :
                 <Box
                     id="register-container"
                     height={'85vh'}
@@ -111,17 +115,16 @@ function App() {
                             severity="error" 
                             sx={{
                                 marginTop: '.5rem',
-                                boxShadow: '0px 0px 4px 0px rgba(180,0,0, .5)',
-                                background: 'rgba(90, 0,0)',
-                                color: 'rgba(250,110,110)',
+                                boxShadow: '0px 0px 10px 0px rgba(180,0,0, .5)',
+                                background: 'rgba(150,0,0)',
+                                color: 'rgba(250,150,150)',
                                 borderRadius: '10px'
                         }}>The fields cannot be null!</Alert> 
                         : 
                         null
                     }
                 </Box>
-                : <ChatArea user={user}/>
-           }
+            }
         </Box>
     )
 }

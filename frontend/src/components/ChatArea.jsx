@@ -1,5 +1,6 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable react/prop-types */
-import {useEffect, useRef, useState} from "react"
+import {useEffect, useState} from "react"
 
 import SockJS from "sockjs-client"
 import Stomp from "stompjs"
@@ -18,7 +19,7 @@ const ChatArea = ({user}) => {
     const [selectedUser, setSelectedUser] = useState(null)
     const [selectedChatMessages, setSelectedChatMessages] = useState([])
     const [message, setMessage] = useState("")
-    const messageInput = useRef(null)
+    const messageInput = document.querySelector('.message-input')
     const chat = document.getElementById('chat-container')
     const [stompClient, setStompClient] = useState(null)
 
@@ -30,10 +31,13 @@ const ChatArea = ({user}) => {
             const onReceivedMessage = (payload) => {
                 if(payload){
                     const receivedMessage = JSON.parse(payload.body)
-                    setSelectedChatMessages((prevMessages) => [...prevMessages, receivedMessage])  
+                    if(selectedUser){
+                        if(!selectedChatMessages.includes(receivedMessage)){
+                            setSelectedChatMessages((prevMessages) =>  [...prevMessages, receivedMessage])  
+                        }
+                        findSelectedChat()
+                    }
                 }
-
-                findSelectedChat()
             }
 
             if(client){
@@ -72,18 +76,24 @@ const ChatArea = ({user}) => {
 
     const selectUserItem = (e) => {
         setSelectedUser(e.target.textContent)
-        findSelectedChat()
+        if(selectedUser){
+            findSelectedChat()
+            chat.scrollTop = chat.scrollHeight
+        }
     }
 
     const findSelectedChat = async () => {
         await axios.get(`${urlBase}/messages/${user.nickName}/${selectedUser}`)
         .then(res => {
             setSelectedChatMessages(res.data) 
-            chat.scrollTop = chat.scrollHeight
         })
     }
     
     const sendMessage = (e) => {
+        e.preventDefault()
+        
+        setMessage("")
+        messageInput.value = ""
         if(user && message){
             const chatMessage = {
                 senderId: user.nickName,
@@ -92,11 +102,8 @@ const ChatArea = ({user}) => {
                 timestamp: new Date()
             }
             stompClient.send('/app/chat', {}, JSON.stringify(chatMessage))
-            messageInput.value = ""
-            setMessage("")
             findSelectedChat()
-            
-            e.preventDefault()
+            chat.scrollTop = chat.scrollHeight
         }
     }
 
